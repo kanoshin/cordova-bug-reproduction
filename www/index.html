@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+        <meta http-equiv="Content-Security-Policy" content="default-src *; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+                
+                <script src="cordova.js"></script>
+                <script src="scripts/Core/jquery.js"></script>
+                </head>
+    
+    <body>
+        
+        <div class="page login-view">
+            <br/>
+            <br/>
+            <span class="help-block">Getting ready...</span>
+        </div>
+        
+        <script type="text/javascript">
+            
+            var $helpBlock = $('.help-block');
+            
+            document.addEventListener("deviceready", onDeviceReady, false);
+            
+            function onDeviceReady() {
+                $helpBlock.text('Ready');
+                
+                var db;
+                
+                var checkCache = function() {
+                    $helpBlock.text('try to check cache');
+                    db.transaction(function(tx) {
+                        $helpBlock.text('opened tran for cache check');
+                        tx.executeSql('SELECT Value FROM ApplicationState WHERE Key = \'CachedUrl\'', [],
+                            function(transaction, result) {
+                                $helpBlock.text('Done!');
+                            },
+                            function() {
+                                $helpBlock.text('Done!');
+                            }
+                        );
+                    });
+                };
+                
+                var dbSettings = { name: "main", location: 1 };
+                
+                db = window.sqlitePlugin.openDatabase(dbSettings, function() {
+                        $helpBlock.text('db opened');
+                        db.transaction(function(tx) {
+                            $helpBlock.text('opened transaction');
+                            tx.executeSql('delete FROM ApplicationState WHERE Key = \'HistoryPositionKey\'', null, checkCache, checkCache);
+                        });
+                    }, function() {
+                        console.log('Failed to open database');
+                        console.log(arguments);
+                    });
+            }
+        </script>
+    </body>
+</html>
